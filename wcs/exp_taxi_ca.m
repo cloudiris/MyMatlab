@@ -63,11 +63,12 @@ while (intvprocessed < intvn)
     end
     
     rec = [];
+    % 
     intv_l = (batchc - 1) * intvbatch + 1;
     intv_h = min(intvn, batchc * intvbatch);
     for intv = intv_l : intv_h
         filename = sprintf('%s_intv%d.txt', week, intv);
-        nrec = load([workpath 'taxidata\' filename]);
+        nrec = load([workpath 'taxidata/' filename]);
         rec = [rec; nrec];
         if (~NDEBUG)
             fprintf(' %d ', length(nrec));
@@ -127,27 +128,55 @@ while (intvprocessed < intvn)
                 prob = cost.^(-1 * alp) / sum(cost.^(-1 * alp));
                 samplex = randsamplewtr(N, M, prob);
 
-            elseif (floor(sampling) == 2) %pair
-                group = round(10 * (sampling - floor(sampling)));
-                if (group == 0) group = 2; end
-                gs = randperm(N);
-                gn = min(floor(N/group), M);
-                sn = floor(M/gn) * ones(1, gn);
-                toadd = M - gn*floor(M/gn);
-                if (toadd > 0)
-                    sn(1:toadd) = sn(1:toadd) + 1;
+            elseif (floor(sampling) == 2) %pw-centralized
+                M0 = M;
+                if (2 * M0 > N) M = N - M; end
+                cands = randperm(N, 2*M);
+                colidxs = (rec(cands, 6)-1)*dim(1)*dim(2) + (rec(cands, 4)-1)*dim(2) + (rec(cands, 5)-1);
+                [colidxs, cin] = sort(colidxs);
+                cands = cands(cin);
+                count_in_cell = zeros(n*intvn, 2);
+                map_count_to_sidx = zeros(n*intvn, 1);
+                cacheidx = 0;
+                segcounter = 0;
+                for candi = 1 : 2*M
+                    if (colidxs(candi) ~= cacheidx)
+                        cacheidx = colidxs(candi);
+                        tidx = floor(colidxs(candi) / dim(1) / dim(2)) + 1;
+                        coor1 = floor((colidxs(candi) - (tidx-1)*dim(1)*dim(2)) / dim(2)) + 1;
+                        coor2 = mod(colidxs(candi), dim(2)) + 1;
+                        sidx = segmapping(coor1 + 1, coor2 + 1);
+                        if (sidx ~= 0) 
+                            segcounter = segcounter + 1; 
+                            count_in_cell(segcounter, 1) = candi;
+                        end
+                    end
+                    if (sidx == 0) continue; end
+                    count_in_cell(segcounter, 2) = count_in_cell(segcounter) + 1;
+                    map_count_to_sidx(segcounter) = (sidx-1)*intvn + (tidx-1) + 1;
                 end
-                chosen = 0;
-                for gi = 1 : gn
-                    [~, midx] = sort(cost(gs((gi-1)*group+1 : gi*group)));
-                    samplex(chosen+1:chosen+sn(gi)) = gs((gi-1)*group*ones(1, sn(gi))+midx(1:sn(gi)));
-                    chosen = chosen + sn(gi);
-                end
-%                 p2 = randperm (N, group * M);
-%                 for chosen = 1 : M
-%                     [~, midx] = min(cost(p2((chosen-1)*group+1 : chosen*group)));
-%                     samplex(chosen) = p2((chosen-1)*group + midx);
+                
+                
+%                 group = round(10 * (sampling - floor(sampling)));
+%                 if (group == 0) group = 2; end
+%                 gs = randperm(N);
+%                 gn = min(floor(N/group), M);
+%                 sn = floor(M/gn) * ones(1, gn);
+%                 toadd = M - gn*floor(M/gn);
+%                 if (toadd > 0)
+%                     sn(1:toadd) = sn(1:toadd) + 1;
 %                 end
+%                 chosen = 0;
+%                 for gi = 1 : gn
+%                     [~, midx] = sort(cost(gs((gi-1)*group+1 : gi*group)));
+%                     samplex(chosen+1:chosen+sn(gi)) = gs((gi-1)*group*ones(1, sn(gi))+midx(1:sn(gi)));
+%                     chosen = chosen + sn(gi);
+%                 end
+% %                 p2 = randperm (N, group * M);
+% %                 for chosen = 1 : M
+% %                     [~, midx] = min(cost(p2((chosen-1)*group+1 : chosen*group)));
+% %                     samplex(chosen) = p2((chosen-1)*group + midx);
+% %                 end
 
             elseif (sampling == 3) % ia
                 u = 10;
