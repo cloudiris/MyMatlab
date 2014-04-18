@@ -129,6 +129,7 @@ while (intvprocessed < intvn)
                 samplex = randsamplewtr(N, M, prob);
 
             elseif (floor(sampling) == 2) %pw-centralized
+                samplex = zeros(1, N);
                 M0 = M;
                 if (2 * M0 > N) M = N - M; end
                 cands = randperm(N, 2*M);
@@ -152,11 +153,57 @@ while (intvprocessed < intvn)
                         end
                     end
                     if (sidx == 0) continue; end
-                    count_in_cell(segcounter, 2) = count_in_cell(segcounter) + 1;
+                    count_in_cell(segcounter, 2) = count_in_cell(segcounter, 2) + 1;
                     map_count_to_sidx(segcounter) = (sidx-1)*intvn + (tidx-1) + 1;
                 end
                 
+                % pairing within cells
+                extra_counter = 0;
+                extra_cands = zeros(n*intvn, 4); % tidx|sidx|cost|idx
+                for celli = 1 : n*intvn
+                    if (count_in_cell(celli) == 0) break; end
+                    number_cands = count_in_cell(celli, 2);
+                    cands_start = count_in_cell(celli, 1);
+                    cands_in_cell = cands(cands_start:cands_start+number_cands-1);
+                    sidx = map_count_to_sidx(celli);
+                    cands_cost = cost(cands_in_cell);
+                    [~, in] = sort(cands_cost);                    
+                    
+                    if (2*M0 <= N)
+                        samplex(cands_in_cell(in(1:floor(number_cands/2)))) = 1;
+                    else
+                        samplex(cands_in_cell(in(ceil(number_cands/2)+1 : end))) = 1;
+                    end
+                    
+                    if (mod(number_cands, 2) == 1)
+                        extra_counter = extra_counter + 1;
+                        candidx = cands_in_cell(in(floor(number_cands/2) + 1));
+                        cellidx = map_count_to_sidx(celli);
+                        sidx = floor(cellidx / intvn) + 1;
+                        tidx = mod(cellidx, intvn) + 1;
+                        extra_cands(extra_counter, :) = [tidx, sidx, cost(candidx), candidx];
+                    end
+                end
                 
+                % pairing between cells
+                for tidxi = 1 : intvn
+                    extrai = find(extra_cands(:,1) == tidxi);
+                    [ssegidx, in] = sort(extra_cands(extrai, 2));
+                    for segi = 1 : floor(length(ssegidx)/2)
+                        c1 = extrai(in(2*segi-1));
+                        c2 = extrai(in(2*segi));
+                        if (2*M0 <= N)
+                            if (extra_cands(c1, 3) < extra_cands(c2, 3)) samplex(extra_cands(c1, 4)) = 1;
+                            else samplex(extra_cands(c2, 4)) = 1; end
+                        else
+                            if (extra_cands(c1, 3) > extra_cands(c2, 3)) samplex(extra_cands(c1, 4)) = 1;
+                            else samplex(extra_cands(c2, 4)) = 1; end
+                        end
+                    end
+                end
+                
+                if (2*M0 > N) samplex = find(samplex == 0);
+                else samplex = find(samplex == 1); end
 %                 group = round(10 * (sampling - floor(sampling)));
 %                 if (group == 0) group = 2; end
 %                 gs = randperm(N);
