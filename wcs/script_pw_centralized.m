@@ -108,7 +108,7 @@ end
 figure
 hold on
 if (exist('sres_random','var')) plot(accstops,sres_random); end
-if (exist('sres_pair','var')) plot(accstops,sres_group, 'r'); end
+if (exist('sres_pair','var')) plot(accstops,sres_pair, 'r'); end
 if (exist('sres_ca','var')) plot(accstops,sres_ca, 'm'); end
 if (exist('sres_greedy','var')) plot(accstops,sres_greedy, 'k'); end
 if (exist('sres_llc','var')) plot(accstops,sres_llc, 'g'); end
@@ -116,7 +116,7 @@ if (exist('sres_optimal','var')) plot(accstops, sres_optimal, 'y'); end
 
 sres_all = [];
 if (exist('sres_random','var')) sres_all = [sres_all sres_random]; end
-if (exist('sres_pair','var')) sres_all = [sres_all sres_group]; end
+if (exist('sres_pair','var')) sres_all = [sres_all sres_pair]; end
 if (exist('sres_ca','var')) sres_all = [sres_all sres_ca]; end
 if (exist('sres_greedy','var')) sres_all = [sres_all sres_greedy]; end
 if (exist('sres_llc','var')) sres_all = [sres_all sres_llc]; end
