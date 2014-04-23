@@ -46,7 +46,7 @@ mfracn = length(mfracs);
 times = 1;
 single_runs = mfracn * times;
 
-samplings = [0 1 5]; %0 random, 1 ca, 2 pair, 4 tmc, 5 greedy
+samplings = [0 2.1 5]; %0 random, 1 ca, 2 pair, 2.1 pw-d, 4 tmc, 5 greedy
 alp = 2.7;
 % k = 2;
 samplingn = length(samplings);
@@ -59,6 +59,7 @@ exp_taxi_ca;
 res_random = res(find(res(:,1)==0), 2:8);
 res_ca = res(find(res(:,1)==1), 2:8);
 res_pair = res(find(res(:,1)==2), 2:8);
+res_pw_d = res(find(res(:,1)==2.1), 2:8);
 res_tmc = res(find(res(:,1)==4), 2:8);
 res_greedy = res(find(res(:,1)==5), 2:8);
 if (size(res_random,1) == mfracn && size(res_random, 1) == size(res_greedy, 1)) 
@@ -75,6 +76,7 @@ for samplingi = 1 : samplingn
     if (sampling == 0) tres = res_random;
     elseif (sampling == 1) tres = res_ca;
     elseif (sampling == 2) tres = res_pair;
+    elseif (sampling == 2.1) tres = res_pw_d;
     elseif (sampling == 4) tres = res_tmc;
     elseif (sampling == 5) tres = res_greedy;
     end
@@ -85,6 +87,7 @@ for samplingi = 1 : samplingn
     if (sampling == 0) sres_random = sres_target;
     elseif (sampling == 1) sres_ca = sres_target;
     elseif (sampling == 2) sres_pair = sres_target;
+    elseif (sampling == 2.1) sres_pw_d = sres_target;
     elseif (sampling == 4) sres_tmc = sres_target;
     elseif (sampling == 5) sres_greedy = sres_target;
     end
@@ -103,7 +106,8 @@ end
 figure
 hold on
 if (exist('sres_random','var')) plot(accstops,sres_random); end
-if (exist('sres_pair','var')) plot(accstops,sres_group, 'r'); end
+if (exist('sres_pair','var')) plot(accstops,sres_pair, 'r'); end
+if (exist('sres_pw_d','var')) plot(accstops,sres_pw_d, 'c'); end
 if (exist('sres_ca','var')) plot(accstops,sres_ca, 'm'); end
 if (exist('sres_greedy','var')) plot(accstops,sres_greedy, 'k'); end
 if (exist('sres_llc','var')) plot(accstops,sres_llc, 'g'); end
@@ -111,7 +115,8 @@ if (exist('sres_optimal','var')) plot(accstops, sres_optimal, 'y'); end
 
 sres_all = [];
 if (exist('sres_random','var')) sres_all = [sres_all sres_random]; end
-if (exist('sres_pair','var')) sres_all = [sres_all sres_group]; end
+if (exist('sres_pair','var')) sres_all = [sres_all sres_pair]; end
+if (exist('sres_pw_d','var')) sres_all = [sres_all sres_pw_d]; end
 if (exist('sres_ca','var')) sres_all = [sres_all sres_ca]; end
 if (exist('sres_greedy','var')) sres_all = [sres_all sres_greedy]; end
 if (exist('sres_llc','var')) sres_all = [sres_all sres_llc]; end
