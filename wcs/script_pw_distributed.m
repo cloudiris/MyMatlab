@@ -46,8 +46,9 @@ mfracn = length(mfracs);
 times = 1;
 single_runs = mfracn * times;
 
-samplings = [0 2.1 5]; %0 random, 1 ca, 2 pair, 2.1 pw-d, 4 tmc, 5 greedy
+samplings = [0 1 2 3 4 5]; %0 random, 1 ca, 2 pair, 3 pw-d, 4 tmc, 5 greedy
 alp = 2.7;
+dis_thr = 1; % in km
 % k = 2;
 samplingn = length(samplings);
 
@@ -118,6 +119,7 @@ if (exist('sres_random','var')) sres_all = [sres_all sres_random]; end
 if (exist('sres_pair','var')) sres_all = [sres_all sres_pair]; end
 if (exist('sres_pw_d','var')) sres_all = [sres_all sres_pw_d]; end
 if (exist('sres_ca','var')) sres_all = [sres_all sres_ca]; end
+if (exist('sres_tmc','var')) sres_all = [sres_all sres_tmc]; end
 if (exist('sres_greedy','var')) sres_all = [sres_all sres_greedy]; end
 if (exist('sres_llc','var')) sres_all = [sres_all sres_llc]; end
 if (exist('sres_optimal','var')) sres_all = [sres_all sres_optimal]; end

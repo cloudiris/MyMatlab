@@ -228,7 +228,9 @@ while (intvprocessed < intvn)
 % %                 end
 
             elseif (sampling == 2.1) %pw-decentralized
-                dis_thr = 1; % in km
+                if (~exist('dis_thr', 'var') || dis_thr <= 0) 
+                    dis_thr = 1; % in km
+                end
                 samplex = zeros(1, N);
                 M0 = M;
                 if (2*M0 > N) M = N - M; end

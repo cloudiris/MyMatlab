@@ -116,9 +116,13 @@ while (intvprocessed < intvn)
             
             tic;
             if (sampling == 0) % random sampling
+                fprintf('RANDOM SAMPLING:\n');
+%                 fbit = binornd(1, M/N, [1, N]);
+%                 samplex = find(fbit==1);
                 samplex = randperm(N, M);
 
             elseif (floor(sampling) == 1) % ca
+                fprintf('COST-AWARE:\n');
 %                 if (sampling == 1.1) alp = 0.1;
 %                 elseif (sampling == 1.2) alp = 0.5;
 %                 elseif (sampling == 1.3) alp = 2;
@@ -129,6 +133,7 @@ while (intvprocessed < intvn)
                 samplex = randsamplewtr(N, M, prob);
 
             elseif (floor(sampling) == 2) %pw-centralized
+                fprintf('PW-C:\n');
                 samplex = zeros(1, N);
                 M0 = M;
                 if (2 * M0 > N) M = N - M; end
@@ -225,22 +230,85 @@ while (intvprocessed < intvn)
 % %                     samplex(chosen) = p2((chosen-1)*group + midx);
 % %                 end
 
-            elseif (sampling == 3) % ia
-                u = 10;
-                ipc = ones(1, N) ./ cost;
-                for chosen = 1 : M
-                    cands = find(ipc==max(ipc));
-                    samplex(chosen) = cands(randsample(length(cands), 1));
-                    % fading
-                    chosen_rec = rec(samplex(chosen), :);
-                    xvec = (chosen_rec(2) .* ones(1,N) - rec(:,2)').^2;
-                    yvec = (chosen_rec(3) .* ones(1,N) - rec(:,3)').^2;
-                    distvec = -1 .* (xvec + yvec).^(-u/2);
-                    fade = u.^distvec;
-                    fade(samplex(chosen)) = 0;
-                    ipc = ipc .* fade;
+            elseif (floor(sampling) == 3) %pw-decentralized
+                fprintf('PW-D:\n');
+                if (~exist('dis_thr', 'var') || dis_thr <= 0) 
+                    dis_thr = 1; % in km
                 end
+                samplex = zeros(1, N);
+                M0 = M;
+                if (2*M0 > N) M = N - M; end
+                p = 2*M / N;
+                fbit = binornd(1, p, [1, N]);
+                cands = find(fbit==1);
+                mm = length(cands);
+                [~, in] = sort(rec(cands, 6));
+                start = 1;
+                for ci = 1 : mm+1
+                    if (ci == mm + 1 || rec(cands(in(ci)), 6) ~= rec(cands(in(start)), 6))
+                        % pairing within an interval
+                        cand_in_intv = rec(cands(in(start : ci-1)), :);
+                        number_in_intv = length(cand_in_intv);
+                        flag_taken = zeros(1, number_in_intv);
+                        for cii = 1 : number_in_intv
+                            if (flag_taken(cii) ~= 0) continue; end
+                            % calculate distance
+                            lat1 = cand_in_intv(cii, 2) * ones(1, number_in_intv);
+                            lon1 = cand_in_intv(cii, 3) * ones(1, number_in_intv);
+                            lat2 = cand_in_intv(:, 2)';
+                            lon2 = cand_in_intv(:, 3)';
+                            dLat = (lat1 - lat2) * pi / 180;
+                            dLon = (lon1 - lon2) * pi / 180;
+                            arc = sin(dLat/2) .* sin(dLat/2) +...
+                                cos(lat1 * pi/180) .* cos(lat2 * pi/180) .*...
+                                sin(dLon/2) .* sin(dLon/2); 
+                            arc(arc<0)=0;
+                            arc(arc>1)=1;
+                            cir = 2 * atan2(sqrt(arc), sqrt(1-arc));
+                            dis = 6371 * cir;
+                            
+                            flag_taken(cii) = inf;
+                            dis = dis .* flag_taken;
+                            dis(dis>dis_thr) = inf;
+                            nbidx = find(dis<inf);
+                            if (isempty(nbidx)) continue; end;
+                            peer = nbidx(1);
+                            idx1 = cands(in(start + cii - 1));
+                            idx2 = cands(in(start + peer - 1));
+                            if (2*M0 <= N) % normal
+                                if (cost(idx1) < cost(idx2)) samplex(idx1) = 1;
+                                else samplex(idx2) = 1; end
+                            else % exclude
+                                if (cost(idx1) > cost(idx2)) samplex(idx1) = 1;
+                                else samplex(idx2) = 1; end
+                            end
+                        end
+                        start = ci;
+                    else
+                        continue;
+                    end
+                end
+                
+                if (2*M0 > N) samplex = find(samplex == 0);
+                else samplex = find(samplex == 1); end
+                
+%             elseif (sampling == 3) % ia
+%                 u = 10;
+%                 ipc = ones(1, N) ./ cost;
+%                 for chosen = 1 : M
+%                     cands = find(ipc==max(ipc));
+%                     samplex(chosen) = cands(randsample(length(cands), 1));
+%                     % fading
+%                     chosen_rec = rec(samplex(chosen), :);
+%                     xvec = (chosen_rec(2) .* ones(1,N) - rec(:,2)').^2;
+%                     yvec = (chosen_rec(3) .* ones(1,N) - rec(:,3)').^2;
+%                     distvec = -1 .* (xvec + yvec).^(-u/2);
+%                     fade = u.^distvec;
+%                     fade(samplex(chosen)) = 0;
+%                     ipc = ipc .* fade;
+%                 end
             elseif (sampling == 4) % TMC
+                fprintf('TMC:\n');
                 cabM = floor(mfrac * cabnum);
                 chosenCab = zeros(1, max(cabID));
                 chosenCab(cabID(randsample(cabnum, cabM))) = ones(1, cabM);
@@ -254,6 +322,7 @@ while (intvprocessed < intvn)
                 end
                 
             elseif (sampling == 5) % greedy
+                fprintf('GREEDY:\n');
                 [~, cheap] = sort(cost);
                 samplex = cheap(1:M);
             end
