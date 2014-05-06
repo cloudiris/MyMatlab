@@ -249,30 +249,38 @@ while (intvprocessed < intvn)
                         % pairing within an interval
                         cand_in_intv = rec(cands(in(start : ci-1)), :);
                         number_in_intv = length(cand_in_intv);
-                        flag_taken = zeros(1, number_in_intv);
+                        flag_taken = ones(1, number_in_intv);
                         for cii = 1 : number_in_intv
-                            if (flag_taken(cii) ~= 0) continue; end
+                            if (flag_taken(cii) ~= 1) continue; end
                             % calculate distance
-                            lat1 = cand_in_intv(cii, 2) * ones(1, number_in_intv);
-                            lon1 = cand_in_intv(cii, 3) * ones(1, number_in_intv);
-                            lat2 = cand_in_intv(:, 2)';
-                            lon2 = cand_in_intv(:, 3)';
-                            dLat = (lat1 - lat2) * pi / 180;
-                            dLon = (lon1 - lon2) * pi / 180;
-                            arc = sin(dLat/2) .* sin(dLat/2) +...
-                                cos(lat1 * pi/180) .* cos(lat2 * pi/180) .*...
-                                sin(dLon/2) .* sin(dLon/2); 
-                            arc(arc<0)=0;
-                            arc(arc>1)=1;
-                            cir = 2 * atan2(sqrt(arc), sqrt(1-arc));
-                            dis = 6371 * cir;
+%                             lat1 = cand_in_intv(cii, 2) * ones(1, number_in_intv);
+%                             lon1 = cand_in_intv(cii, 3) * ones(1, number_in_intv);
+%                             lat2 = cand_in_intv(:, 2)';
+%                             lon2 = cand_in_intv(:, 3)';
+%                             dLat = (lat1 - lat2) * pi / 180;
+%                             dLon = (lon1 - lon2) * pi / 180;
+%                             arc = sin(dLat/2) .* sin(dLat/2) +...
+%                                 cos(lat1 * pi/180) .* cos(lat2 * pi/180) .*...
+%                                 sin(dLon/2) .* sin(dLon/2); 
+%                             arc(arc<0)=0;
+%                             arc(arc>1)=1;
+%                             cir = 2 * atan2(sqrt(arc), sqrt(1-arc));
+%                             dis = 6371 * cir;
+                            
+                            refLat = cand_in_intv(cii, 2);
+                            lon1degree = cos(refLat)*lat1degree;
+                            dLat = 1e-5 * lat1degree * (cand_in_intv(cii, 2) * ones(1, number_in_intv) - cand_in_intv(:, 2)');
+                            dLon = 1e-5 * lon1degree * (cand_in_intv(cii, 3) * ones(1, number_in_intv) - cand_in_intv(:, 3)');
+                            dis = dLat.*dLat + dLon.*dLon;
                             
                             flag_taken(cii) = inf;
+                            dis(cii) = inf;
                             dis = dis .* flag_taken;
-                            dis(dis>dis_thr) = inf;
+                            dis(dis>dis_thr^2) = inf;
                             nbidx = find(dis<inf);
                             if (isempty(nbidx)) continue; end;
                             peer = nbidx(1);
+                            flag_taken(peer) = inf;
                             idx1 = cands(in(start + cii - 1));
                             idx2 = cands(in(start + peer - 1));
                             if (2*M0 <= N) % normal
@@ -357,7 +365,8 @@ while (intvprocessed < intvn)
                     end
                 end
             end
-            fprintf('Batch work %d sampling(%.1f) finished: %d recs(%.2f) sampled\n', batchc, sampling, sum(sum(counter)), mfrac);
+            cclock = clock();
+            fprintf('Batch work %d sampling(%.1f) finished: %d recs(%.2f) sampled (%.0f:%.0f)\n', batchc, sampling, sum(sum(counter)), mfrac, cclock(4), cclock(5));
         end
     end
     fprintf('Batch work %d finished\n', batchc);

@@ -6,6 +6,12 @@ NDEBUG = 0;
 if (ispc()) workpath = 'd:\document\codes\matlab\wcs\';
 else workpath = '~/Documents/Codes/Matlab/wcs/'; end
 
+% const
+earthR = 6371;
+earthC = 2*earthR*pi;
+lat1degree = earthC / 360;
+% --const
+
 week = 'w2';
 seg = load('200seg.txt');
 n = length(seg);
@@ -46,9 +52,9 @@ mfracn = length(mfracs);
 times = 1;
 single_runs = mfracn * times;
 
-samplings = [0 1 2 3 4 5]; %0 random, 1 ca, 2 pair, 3 pw-d, 4 tmc, 5 greedy
+samplings = [3]; %0 random, 1 ca, 2 pair, 3 pw-d, 4 tmc, 5 greedy
 alp = 2.7;
-dis_thr = 1; % in km
+dis_thr = 0.05; % in km
 % k = 2;
 samplingn = length(samplings);
 
@@ -60,7 +66,7 @@ exp_taxi_ca;
 res_random = res(find(res(:,1)==0), 2:8);
 res_ca = res(find(res(:,1)==1), 2:8);
 res_pair = res(find(res(:,1)==2), 2:8);
-res_pw_d = res(find(res(:,1)==2.1), 2:8);
+res_pw_d = res(find(res(:,1)==3), 2:8);
 res_tmc = res(find(res(:,1)==4), 2:8);
 res_greedy = res(find(res(:,1)==5), 2:8);
 if (size(res_random,1) == mfracn && size(res_random, 1) == size(res_greedy, 1)) 
@@ -77,7 +83,7 @@ for samplingi = 1 : samplingn
     if (sampling == 0) tres = res_random;
     elseif (sampling == 1) tres = res_ca;
     elseif (sampling == 2) tres = res_pair;
-    elseif (sampling == 2.1) tres = res_pw_d;
+    elseif (sampling == 3) tres = res_pw_d;
     elseif (sampling == 4) tres = res_tmc;
     elseif (sampling == 5) tres = res_greedy;
     end
@@ -88,7 +94,7 @@ for samplingi = 1 : samplingn
     if (sampling == 0) sres_random = sres_target;
     elseif (sampling == 1) sres_ca = sres_target;
     elseif (sampling == 2) sres_pair = sres_target;
-    elseif (sampling == 2.1) sres_pw_d = sres_target;
+    elseif (sampling == 3) sres_pw_d = sres_target;
     elseif (sampling == 4) sres_tmc = sres_target;
     elseif (sampling == 5) sres_greedy = sres_target;
     end
