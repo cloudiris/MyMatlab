@@ -1,7 +1,7 @@
 clear
 clc
 
-pm25i = load('pm25i.txt');
+pm25i = load('.\airdata\pm25i.txt');
 dim = size(pm25i);
 n = dim(2);
 snapn = dim(1);
@@ -12,7 +12,7 @@ b = base_dct4(n);
 
 % cost = load('d:\document\codes\data\cost\cost.stationu64.txt');
 % cost = load('d:\document\codes\data\cost\cost.gradient.32.32.txt');
-cost = load('D:\Document\Codes\Matlab\wcs\3gcost.32.32.txt');
+cost = load('.\airdata\3gcost.32.32.txt');
 cost = cost(1:32, 1:32);
 costv = hilbertcurve(cost);
 alp = 1;
