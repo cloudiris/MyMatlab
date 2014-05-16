@@ -1,21 +1,20 @@
-function bases = train_pm25(y, train_per, ks)
+function bases = train_pm25(y, ks)
 
 fprintf('training start\n');
 dim = size(y);
 
-n = dim(1); %measurment dimension = 1024
-N = dim(2); %# samples = 5000
+n = dim(1); %measurment dimension = 100
+N = dim(2); %# samples = 400
+K = floor(n * 1.5);
 
-trainstop = floor(N * train_per);
-
-data = y(:, 1:trainstop);
-
-k_size = size(ks, 1);
-bases = zeros(k_size, n, n);
+k_size = size(ks, 2);
+bases = zeros(k_size, n, K);
 
 for i = 1:k_size
     k = ks(i);
-    tb = orth(simple_ksvd(data, n, k, 1));
-    b(i, 1:size(tb,1),1:size(tb,2)) = tb;
+    tb = orth(simple_ksvd(y, K, k, 1));
+    tb(1:10, 1:10)
+    bases(1:size(tb,1),1:size(tb,2),i) = tb;
+    bases(1:10, 1:10, i)
     fprintf('%d is over, rank=%d\n', k, rank(tb));
 end
