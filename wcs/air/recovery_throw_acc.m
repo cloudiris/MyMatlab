@@ -4,7 +4,7 @@ function acc = recovery_throw_acc(y_observe, y, base, m, k, theta, guess, thr, d
     samplex = randperm(n, m);
     guess_vector = guess * ones(length(samplex), 1);
     r_vector = rand(length(samplex), 1);
-    samplex_var = samplex(union(find(abs(y_observe(samplex) - y(samplex)) <= y(samplex) * thr), find(r_vector(:) > guess_vector(:)) ))';
+    samplex_var = samplex(union(intersect(find(abs(y_observe(samplex) - y(samplex)) <= y(samplex) * thr), find(r_vector(:) < guess_vector(:))), find(r_vector(:) > guess_vector(:)) ))';
 %     samplex_var = [];
 %     for i = 1:length(samplex)
 %         if (abs(y(samplex(i)) - y_sample(i)) <= y(samplex(i)) * thr)
