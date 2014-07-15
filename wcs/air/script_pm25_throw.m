@@ -1,7 +1,7 @@
 clear
 clc
  
-pm25i = load('.\airdata\pm25i.txt');
+pm25i = load('/Users/xiaohong/Documents/Research/Project_Git/Data/pm25i.txt');
 fprintf('load finished\n');
 
 dim = size(pm25i);

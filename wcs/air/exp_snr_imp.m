@@ -1,14 +1,23 @@
 function snr = exp_snr_imp(y, y_recover, mode)
 
-importance = (y .^ 2) ./ sum(y .^ 2);
-mask = find(y(:) >= quantile(y(:), 0.7));
+%err = (max(y) - min(y)) / 50;
+%((y - y_min) .^ 2) ./ sum((y - y_min) .^ 2);
+importance = compute_impotrance(y);
+
+mask = find(y(:) >= quantile(y(:), 0.5));
 diff = abs(y - y_recover);
 
 if (mode == 1)
-    snr = (importance)' * (diff);
+    snr = sum(importance .* diff);
 elseif (mode == 0)
-    snr = numel(find(diff(mask) <= 10)) / size(diff(mask), 1);
+    snr = numel(find(diff(mask) <= 2)) / size(diff(mask), 1);
 elseif (mode == 2)
-    snr = (importance)' * (diff .^ 2);
+    snr = sum(importance .* diff .^ 2);
+elseif (mode == 11)
+    snr = sum(diff);
+elseif (mode == 10)
+    snr = numel(find(diff <= 5)) / size(diff, 1);
+elseif (mode == 12)
+    snr = sum(diff .^ 2);
 end
 
