@@ -1,4 +1,4 @@
-function [x y y_hat sigma_hat A mask Num_obs] = signal_generator_uniform(N, T, K)
+function [x y y_hat sigma_hat A mask Num_obs sigma] = signal_generator_uniform(N, T, K)
 
 %rand('state', 1);
 %randn('state', 2);
@@ -39,7 +39,7 @@ A = A./repmat(sqrt(sum(A.^2,2)),[1,N]);
 y = A*x;
 
 %Sigma Setting
-sigma = ones(K, 1);
+sigma = rand(K, 1) + 0.5;
 
 %Observations
 Num_obs = max(floor(randn(K, 1) * Mean_obs * 2), 0);

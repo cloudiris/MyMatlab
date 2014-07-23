@@ -10,13 +10,13 @@ T = 10;
 K = size(y, 1);
 
 [y_BP x_BP t_BP] = my_density_csf('BP', x, y, T, sigma, A, mask, 0.2);
-[y_DBP x_DBP t_DBP] = my_density_csf('DBP', x, y, T, sigma, A, mask, 0.02, 15, Num_obs, Num_tot);
-[y_TBP x_TBP t_TBP] = my_density_csf('TBP', x, y, T, sigma, A, mask, 0.02, 15, Num_obs, Num_tot);
+[y_DBP x_DBP t_DBP] = my_density_csf('DBP', x, y, T, sigma, A, mask, 0.02, 10, Num_obs, Num_tot);
+[y_TBP x_TBP t_TBP] = my_density_csf('TBP', x, y, T, sigma, A, mask, 0.02, 10, Num_obs, Num_tot);
 [y_TDBP x_TDBP t_TDBP] = my_density_csf('TDBP', x, y, T, sigma, A, mask, 0.015, 20, Num_obs, Num_tot, y_true);
 [y_OMP x_OMP t_OMP] = my_density_csf('OMP', x, y, T, sigma, A, mask);
-[y_TOMP x_TOMP t_TOMP] = my_density_csf('TOMP', x, y, T, sigma, A, mask, 0, 10, Num_obs, Num_tot);
-[y_DOMP x_DOMP t_DOMP] = my_density_csf('DOMP', x, y, T, sigma, A, mask, 0, 10, Num_obs, Num_tot);
-[y_TDOMP x_TDOMP t_TDOMP] = my_density_csf('TDOMP', x, y, T, sigma, A, mask, 0, 10, Num_obs, Num_tot);
+[y_TOMP x_TOMP t_TOMP] = my_density_csf('TOMP', x, y, T, sigma, A, mask, 0, 50, Num_obs, Num_tot);
+[y_DOMP x_DOMP t_DOMP] = my_density_csf('DOMP', x, y, T, sigma, A, mask, 0, 50, Num_obs, Num_tot);
+[y_TDOMP x_TDOMP t_TDOMP] = my_density_csf('TDOMP', x, y, T, sigma, A, mask, 0, 50, Num_obs, Num_tot);
 [y_BCS x_BCS t_BCS] = my_density_csf('BCS', x, y, T, sigma, A, mask);
 
 % reconstruction error

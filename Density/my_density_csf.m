@@ -1,4 +1,4 @@
-function [y_recover x_recover t] = my_density_csf(method, x, y, T, sigma, A, mask, eps, thr, Num_obs, Num_tot, y_true)
+function [y_recover x_recover t] = my_density_csf(method, x, y, T, sigma, A, mask, eps, thr, Num_obs, Num_tot, C, sigma_true)
 
 % method: Reconstruction method
 % A: Base Matrix(full)
@@ -55,13 +55,18 @@ t = t_BP;
 elseif (strcmp(method, 'TBP') == 1)
 %solve by throw-away BP(TBP)
 tic
-if (nargin >= 12) 
+if (nargin >= 13) 
     yy = abs(y_true(mask) - y);
     %keep = find(yy(:) <= quantile(yy, thr));
     keep = find(yy(:) <= thr);
 else
-    sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
+    %sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
     %keep = find(sigma(:) <= quantile(sigma,thr));
+    if (nargin >= 12) 
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+    else
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
+    end
     keep = find(sigma(:) <= thr);
 end
 x0 = A(keep,:)'*inv(A(keep,:)*A(keep,:)')*y(keep);
@@ -78,12 +83,16 @@ elseif (strcmp(method, 'DBP') == 1)
 %solve by DBP                                                                                                             
 tic;
 %take epsilon a little bigger than sigma*sqrt(K)! 
-if (nargin >= 12) 
-    yy = abs(y_true(mask) - y) + 0.01;
-    sigma = yy;
+if (nargin >= 13) 
+    %yy = abs(y_true(mask) - y) + 0.01;
+    sigma = sigma_true(mask) ./ sqrt(Num_obs(mask));
 else
     %sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
-    sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
+    if (nargin >= 12) 
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+    else
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
+    end
     %keep = find(sigma(:) <= max(sigma));
 end
 Ab = inv(diag(sigma .^ 2)) * A;
@@ -103,7 +112,7 @@ t = t_DBP;
 elseif (strcmp(method, 'TDBP') == 1)
 %solve by throw-away DBP(TDBP)
 tic
-if (nargin >= 12) 
+if (nargin >= 13) 
     yy = abs(y_true(mask) - y);
     %keep = find(yy(:) <= quantile(yy, thr));
     sigma = yy + 0.01;
@@ -165,12 +174,17 @@ t = t_OMP;
 elseif (strcmp(method, 'DOMP') == 1)
 % solve by DOMP
 tic
-if (nargin >= 12) 
+if (nargin >= 13) 
     yy = abs(y_true(mask) - y);
     sigma = yy;
 else
     %sigma = sigma + ones(size(sigma)) * max(y) ./ (Num_obs(mask) .^ 2);
-    sigma = sigma + ones(size(sigma)) * max(sigma)./ (sqrt(Num_obs(mask)));
+    if (nargin >= 12) 
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+    else
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
+    end
+    %sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
 end
 
 [y_DOMP x_DOMP] = my_csf(y, samplex', A, T, 'DOMP', 0, sigma);
@@ -185,14 +199,20 @@ t = t_DOMP;
 elseif (strcmp(method, 'TOMP') == 1) 
 % solve by TOMP
 tic
-if (nargin >= 12) 
+if (nargin >= 13) 
     yy = abs(y_true(mask) - y);
     %keep = find(yy(:) <= quantile(yy, thr));
     keep = find(yy(:) <= thr);
 else
     %keep = find(sigma(:) <= quantile(sigma,thr));
     keep = find(sigma(:) <= thr);
-    sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
+    if (nargin >= 12) 
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+    else
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
+    end
+    %sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
+    %sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
     %sigma = sigma + ones(size(sigma)) * max(y) ./ (Num_obs(mask) .^ 2);
     %keep = find(sigma(:) <= max(sigma));
 end
@@ -209,14 +229,19 @@ t = t_TOMP;
 elseif (strcmp(method, 'TDOMP') == 1) 
 % solve by TDOMP
 tic
-if (nargin >= 12) 
+if (nargin >= 13) 
     yy = abs(y_true(mask) - y);
     %keep = find(yy(:) <= quantile(yy, thr));
     keep = find(yy(:) <= thr);
 else
     %keep = find(sigma(:) <= quantile(sigma,thr));
     keep = find(sigma(:) <= thr);
-    sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
+    if (nargin >= 12) 
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+    else
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
+    end
+    %sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
     %sigma = sigma + ones(size(sigma)) * max(y) ./ (Num_obs(mask) .^ 2);
     %keep = find(sigma(:) <= max(sigma));
 end

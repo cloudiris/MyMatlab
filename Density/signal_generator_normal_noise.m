@@ -1,4 +1,4 @@
-function [x y y_hat sigma_hat A mask Num_obs sigma] = signal_generator_exp(N, T, K)
+function [x y y_hat sigma_hat mask Num_obs sigma] = signal_generator_normal_noise(x_base, A, N, T, K, noise)
 
 %rand('state', 1);
 %randn('state', 2);
@@ -10,19 +10,11 @@ function [x y y_hat sigma_hat A mask Num_obs sigma] = signal_generator_exp(N, T,
 % random +/- 1 signal
 
 %Constant setting
-Mean_obs = 200;
+Mean_obs = 800;
 Max_sigma = 1;
 No_y = 10;
 
-
-co = zeros(T, 1);
-for i = 1:T
-    co(i) = max(randn() + 1, 0);
-end
-x = zeros(N,1);
-q = randperm(N);
-x(q(1:T)) = sign(randn(T,1)); 
-
+x = x_base + noise;
 %power-law sparsity
 %x(q(1:T)) = co;
 
@@ -33,16 +25,13 @@ x(q(1:T)) = sign(randn(T,1));
 % Dictionary = base_dct4(N);
 % d_pos = sort(randsample(N, K));
 % A = Dictionary(d_pos, :);
-
-A = randn(K,N);
-A = A./repmat(sqrt(sum(A.^2,2)),[1,N]);	
 y = A*x;
 
 %Sigma Setting
-sigma = rand(K, 1) + 0.5;
+sigma = rand(K, 1)+ 0.5;
 
 %Observations
-Num_obs = max(floor(exprnd(1.0, K, 1) * Mean_obs), 0);
+Num_obs = max(floor((randn(K, 1) + 3) * Mean_obs / 3), 0);
 
 sigma_true = sigma ./ sqrt(Num_obs);
 
@@ -74,8 +63,8 @@ end
 % hold on
 % plot(sigma_pen, 'r*');
 % 
- figure
- hist(Num_obs);
+% figure
+% hist(Num_obs);
 
 
 

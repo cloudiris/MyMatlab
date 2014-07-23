@@ -39,7 +39,7 @@ A = Dictionary(d_pos, :);
 y = A*x;
 
 %Sigma Setting
-sigma = rand(K, 1) * Max_sigma;
+sigma = rand(K, 1) + 0.5;
 
 %Observations
 %Num_obs = floor(rand(K, 1) * Max_obs);
@@ -62,7 +62,7 @@ for i = 1:K
     if (Num_obs(i) > 0) 
         y_hat(i) = mean(z);
         if (Num_obs(i) > 1)
-            sigma_hat(i) = sqrt(Max_sigma / (Num_obs(i) ^ 2) + (mean(z .^ 2) - y_hat(i) .^ 2) / (Num_obs(i) - 1));
+            sigma_hat(i) = sqrt((mean(z .^ 2) - y_hat(i) .^ 2) / (Num_obs(i) - 1));
         else 
             sigma_hat(i) = Max_sigma;
         end

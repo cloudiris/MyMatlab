@@ -2,7 +2,7 @@ rates = [0.1:0.1:1.0];
 n_round = 5;
 n_rate = size(rates,2);
 n_method = 6;
-bestthr = [15 15 15 15 15 15 15 15 15 15];
+bestthr = [10 10 10 10 10 10 10 10 10 10];
 bestthr2 = [20 20 20 20 20 20 20 20 20 20];
 
 e_y = zeros(n_rate, n_method);
