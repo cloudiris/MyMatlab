@@ -1,4 +1,4 @@
-function [x y y_hat sigma_hat mask Num_obs sigma] = signal_generator_normal_noise(x_base, A, N, T, K, noise)
+function [x y y_hat sigma_hat mask sigma] = signal_generator_normal_noise(x_base, A, N, T, K, noise, Num_obs)
 
 %rand('state', 1);
 %randn('state', 2);
@@ -10,7 +10,7 @@ function [x y y_hat sigma_hat mask Num_obs sigma] = signal_generator_normal_nois
 % random +/- 1 signal
 
 %Constant setting
-Mean_obs = 800;
+Mean_obs = 100;
 Max_sigma = 1;
 No_y = 10;
 
@@ -28,10 +28,10 @@ x = x_base + noise;
 y = A*x;
 
 %Sigma Setting
-sigma = rand(K, 1)+ 0.5;
+sigma = rand(K, 1) / 2;
 
 %Observations
-Num_obs = max(floor((randn(K, 1) + 3) * Mean_obs / 3), 0);
+%Num_obs = max(floor((randn(K, 1) + 3) * Mean_obs / 3), 0);
 
 sigma_true = sigma ./ sqrt(Num_obs);
 

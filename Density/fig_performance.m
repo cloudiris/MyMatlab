@@ -3,13 +3,13 @@ N = 512; % sparse vector length
 T = 5;  % sparsity
 K = 512; % signal length
 
-[x y_true y sigma A mask Num_obs] = signal_generator_normal(N, T, K);
+[x y_true y sigma A mask Num_obs] = signal_generator_exp(N, T, K);
 
 
 [y_BP x_BP t_BP] = my_density_csf('BP', x, y, T, sigma, A, mask, 0.4);
 [y_DBP x_DBP t_DBP] = my_density_csf('DBP', x, y, T, sigma, A, mask, 7, 0.5, Num_obs, Num_tot, 11);
 [y_TBP x_TBP t_TBP] = my_density_csf('TBP', x, y, T, sigma, A, mask, 0.35, 2, Num_obs, Num_tot);
-[y_TDBP x_TDBP t_TDBP] = my_density_csf('TDBP', x, y, T, sigma, A, mask, 0.2, 0.5, Num_obs, Num_tot);
+[y_TDBP x_TDBP t_TDBP] = my_density_csf('TDBP', x, y, T, sigma, A, mask, 0.9, 0.5, Num_obs, Num_tot);
 
 [y_OMP x_OMP t_OMP] = my_density_csf('OMP', x, y, T, sigma, A, mask);
 [y_TOMP x_TOMP t_TOMP] = my_density_csf('TOMP', x, y, T, sigma, A, mask, 0, 0.5, Num_obs, Num_tot);
@@ -63,7 +63,7 @@ title(['(a) BP']);
 subplot(3,1,2);
 plot(y_true);
 hold on;
-plot(y_TBP, 'g');
+plot(y_TDBP, 'g');
 title(['(b) Throw-away BP']);
 
 
@@ -109,7 +109,7 @@ title(['(a) BP']);
 subplot(3,1,2);
 plot(x);
 hold on;
-plot(x_TBP,'m');
+plot(x_TDBP,'m');
 title(['(b) Throw-away BP']);
 
 subplot(3,1,3);

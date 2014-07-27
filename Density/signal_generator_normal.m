@@ -10,8 +10,8 @@ function [x y y_hat sigma_hat A mask Num_obs sigma] = signal_generator_normal(N,
 % random +/- 1 signal
 
 %Constant setting
-Mean_obs = 800;
-Max_sigma = 1;
+Mean_obs = 100;
+Max_sigma = 1.5;
 No_y = 10;
 
 
@@ -39,7 +39,8 @@ A = A./repmat(sqrt(sum(A.^2,2)),[1,N]);
 y = A*x;
 
 %Sigma Setting
-sigma = rand(K, 1)+ 0.5;
+sigma = rand(K, 1) / 2;
+%sigma = ones(K, 1);
 
 %Observations
 Num_obs = max(floor((randn(K, 1) + 3) * Mean_obs / 3), 0);
@@ -51,7 +52,10 @@ y_hat = zeros(K, 1);
 sigma_hat = zeros(K, 1);
 
 for i = 1:K
+    
     z = randn(Num_obs(i), 1) * sigma(i,1) + y(i);
+    %z = exprnd(1.0, Num_obs(i), 1) * y(i);
+    
     if (Num_obs(i) > 0) 
         y_hat(i) = mean(z);
         if (Num_obs(i) > 1)
@@ -64,6 +68,8 @@ for i = 1:K
         sigma_hat(i) = Max_sigma;
     end 
 end
+
+
 % 
 % sigma = sigma_hat(mask);
 % sigma_pen = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
@@ -74,8 +80,8 @@ end
 % hold on
 % plot(sigma_pen, 'r*');
 % 
-% figure
-% hist(Num_obs);
+figure
+hist(Num_obs);
 
 
 

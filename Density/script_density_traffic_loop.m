@@ -1,5 +1,5 @@
 rates = [0.1:0.1:1.0];
-n_round = 5;
+n_round = 1;
 n_rate = size(rates,2);
 n_method = 6;
 bestthr = [10 10 10 10 10 10 10 10 10 10];
@@ -9,7 +9,7 @@ e_y = zeros(n_rate, n_method);
 
 for i_rate = 1:n_rate
     for i_round = 1:n_round
-        [x y_true y sigma A mask Num_obs Num_tot] = signal_readin_traffic(rates(i_rate));
+        [x y_true y sigma A mask Num_obs Num_tot] = signal_readin_traffic(rates(i_rate), 0, 1);
 
         N = size(x, 1);
         T = 10;
@@ -18,7 +18,7 @@ for i_rate = 1:n_rate
         [y_BP x_BP t_BP] = my_density_csf('BP', x, y, T, sigma, A, mask, 0.2);
         
         %e_DBP = finding_epsilon('DBP', 0, 0.1, 0.001, 10, x, y_true, y, sigma, A, mask, Num_obs, Num_tot, 0)
-        [y_DBP x_DBP t_DBP] = my_density_csf('DBP', x, y, T, sigma, A, mask, 0.02, 0, Num_obs, Num_tot);
+        [y_DBP x_DBP t_DBP] = my_density_csf('DBP', x, y, T, sigma, A, mask, 0.02, 0, Num_obs, Num_tot, 5000);
         
         %e_TBP = finding_epsilon('TBP', 0, 0.1, 0.001, 10, x, y_true, y, sigma, A, mask, Num_obs, Num_tot, bestthr(i_rate))
         [y_TBP x_TBP t_TBP] = my_density_csf('TBP', x, y, T, sigma, A, mask, 0.015, bestthr(i_rate), Num_obs, Num_tot);

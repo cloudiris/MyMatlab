@@ -15,6 +15,7 @@ er_TBP = zeros(n_thr, 3);
 
 for i = 1:n_round       
     [x y_true y sigma A mask Num_obs] = signal_generator_normal(N, T, K);
+    Num_tot = zeros(size(Num_Obs));
     for i_thr = 1:n_thr
         [y_TBP x_TBP t_TBP] = my_density_csf('TBP', x, y, T, sigma, A, mask, 0.35, thrs(i_thr), Num_obs, Num_tot);
         Ey_TBP = norm(y_true-y_TBP)/norm(y_true);

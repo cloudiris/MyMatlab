@@ -3,13 +3,14 @@ T = 5;  % sparsity
 K = 512; % signal length
 
 error = zeros(3, 5);
-n_round = 10;
+n_round = 5;
 
-epsilon = [0.66 7 0.35 12.72;
-           0.66 7 0.35 12.5;
-           0.9 7 0.35 12.5];
+epsilon = [0.7 15 0.7 15;
+           0.1 15 0.7 15;
+           0.6 15 0.7 15];
        
-C = [11 11 11];
+C = [0.6 0.6 0.6];
+thr = [0.50 0.50 0.5];
 
 for d = 1:3
     for i = 1:n_round
@@ -21,15 +22,15 @@ for d = 1:3
         Num_tot = zeros(size(Num_obs));
         [y_BP x_BP t_BP] = my_density_csf('BP', x, y, T, sigma, A, mask, 0.7); %epsilon(d,1));
         [y_DBP x_DBP t_DBP] = my_density_csf('DBP', x, y, T, sigma, A, mask, epsilon(d,2), 0, Num_obs, Num_tot, C(d));
-        [y_TBP x_TBP t_TBP] = my_density_csf('TBP', x, y, T, sigma, A, mask, epsilon(d,3), 0.065, Num_obs, Num_tot);
+        [y_TBP x_TBP t_TBP] = my_density_csf('TBP_ratio', x, y, T, sigma, A, mask, epsilon(d,3), thr(d), Num_obs, Num_tot);
         [y_BCS x_BCS t_BCS] = my_density_csf('BCS', x, y, T, sigma, A, mask);
         [y_BOUND x_BOUND t_BOUND] = my_density_csf('DBP', x, y, T, sigma, A, mask, epsilon(d,4) , 0, Num_obs, Num_tot, C(d), sigma_true);
         
-        Ey_BP = norm(y_true-y_BP)/norm(y_true)
-        Ey_BCS = norm(y_true-y_BCS)/norm(y_true)
-        Ey_DBP = norm(y_true-y_DBP)/norm(y_true)      
-        Ey_TBP = norm(y_true-y_TBP)/norm(y_true)
-        Ey_BOUND = norm(y_true-y_BOUND)/norm(y_true)
+        Ey_BP = norm(y_true-y_BP)/512
+        Ey_BCS = norm(y_true-y_BCS)/512
+        Ey_DBP = norm(y_true-y_DBP)/512     
+        Ey_TBP = norm(y_true-y_TBP)/512
+        Ey_BOUND = norm(y_true-y_BOUND)/512
 
         error(d,1) = error(d,1) + Ey_BP / n_round;
         error(d,2) = error(d,2) + Ey_BCS / n_round;
@@ -43,8 +44,8 @@ end
 %error(3,:) = error(1,:);
 
 figure;
-bar(error, 1);
-legend('BP','BCS','WBP','TBP','BOUND');
+bar(error(:, 1:4), 1);
+legend('BP','BCS','WBP','TBP');
 set(gca,'XTickLabel',{'Normal','Uniform','Exponential'});
 set(gcf,'color','white')
 applyhatch(gcf,'\.x/+');

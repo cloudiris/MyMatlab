@@ -79,6 +79,34 @@ x_recover = x_TBP;
 y_recover = y_TBP;
 t = t_TBP;
 
+elseif (strcmp(method, 'TBP_ratio') == 1)
+%solve by throw-away BP(TBP)
+tic
+if (nargin >= 13) 
+    yy = abs(y_true(mask) - y);
+    %keep = find(yy(:) <= quantile(yy, thr));
+    keep = find(yy(:) <= thr);
+else
+    %sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
+    %keep = find(sigma(:) <= quantile(sigma,thr));
+    if (nargin >= 12) 
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+    else
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
+    end
+    keep = find(sigma(:) <= quantile(sigma, thr));
+end
+x0 = A(keep,:)'*inv(A(keep,:)*A(keep,:)')*y(keep);
+epsilon = sqrt(sigma(keep)' * sigma(keep)) * eps;
+x_TBP = l1qc_logbarrier(x0, A(keep, :), [], y(keep), epsilon, 1e-3);
+y_TBP = A_full * x_TBP;
+t_TBP = toc;
+fprintf(1,'TBP number of nonzero weights: %d\n',sum(x_TBP~=0));
+x_recover = x_TBP;
+y_recover = y_TBP;
+t = t_TBP;
+
+
 elseif (strcmp(method, 'DBP') == 1)
 %solve by DBP                                                                                                             
 tic;
@@ -123,6 +151,8 @@ else
     thr = max(sigma);
     keep = find(sigma(:) <= thr);
     sigma = sigma + ones(size(sigma)) * max(sigma) ./ (sqrt(Num_obs(mask)));
+    %% Liwen 1 sigma = sqrt(sigma .* (ones(size(sigma)) + ones(size(sigma)) ./ ((Num_obs(mask) - 1 + 0.001) * 4))); 
+    %% Liwen 2 sigma = sqrt(sigma .* (Num_obs(mask) - 1 + 0.001) ./ (Num_obs(mask) - 1.5 + ones(size(sigma)) ./ ((Num_obs(mask) - 1 + 0.01) * 8)));
     %keep = find(sigma(:) <= max(sigma));
 end
 Ab = inv(diag(sigma .^ 2)) * A;
@@ -207,7 +237,7 @@ else
     %keep = find(sigma(:) <= quantile(sigma,thr));
     keep = find(sigma(:) <= thr);
     if (nargin >= 12) 
-        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5) + 0.0001);
     else
         sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
     end
@@ -237,7 +267,7 @@ else
     %keep = find(sigma(:) <= quantile(sigma,thr));
     keep = find(sigma(:) <= thr);
     if (nargin >= 12) 
-        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5));
+        sigma = sqrt(sigma.^2  + ones(size(sigma)) * C ./ (Num_obs(mask) .^ 1.5) + 0.0001);
     else
         sigma = sqrt(sigma.^2  + ones(size(sigma)) * max(y) .^ 2 ./ (Num_obs(mask) .^ 1.5));
     end

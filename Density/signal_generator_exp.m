@@ -10,8 +10,8 @@ function [x y y_hat sigma_hat A mask Num_obs sigma] = signal_generator_exp(N, T,
 % random +/- 1 signal
 
 %Constant setting
-Mean_obs = 200;
-Max_sigma = 1;
+Mean_obs = 100;
+Max_sigma = 1.5;
 No_y = 10;
 
 
@@ -39,7 +39,7 @@ A = A./repmat(sqrt(sum(A.^2,2)),[1,N]);
 y = A*x;
 
 %Sigma Setting
-sigma = rand(K, 1) + 0.5;
+sigma = rand(K, 1) /2 ;
 
 %Observations
 Num_obs = max(floor(exprnd(1.0, K, 1) * Mean_obs), 0);

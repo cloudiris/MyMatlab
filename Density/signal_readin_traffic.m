@@ -1,10 +1,25 @@
-function [x y_true y_hat sigma_hat A mask Num_obs Num_tot] = signal_readin_traffic(sampling_rate)
+function [x y_true y_hat sigma_hat A mask Num_obs Num_tot] = signal_readin_traffic(sampling_rate, st, en)
 
 y_true = load('/Users/xiaohong/Documents/Research/Project_Git/Data/s.txt');
 Num_tot = load('/Users/xiaohong/Documents/Research/Project_Git/Data/c.txt');
 obs = load('/Users/xiaohong/Documents/Research/Project_Git/Data/obs.txt');
 
+
 K = size(y_true, 1);
+
+a = floor(K * st);
+if (a == 0) 
+    a = 1;
+end
+b = floor(K * en);
+if ( b > K)
+    b = K;
+end
+K = b - a + 1;
+
+y_true = y_true(a:b);
+Num_tot = Num_tot(a: b);
+
 y_hat = zeros(K, 1);
 sigma_hat = zeros(K, 1);
 Max_sigma = (max(y_true) - min(y_true)) / 2;
@@ -16,7 +31,7 @@ No_y = -1;
 % obs = obs(pos_sample,:);
 Num_obs = zeros(K, 1);
 
-for i = 1:K
+for i = a:b
     z = obs(find(obs(:,1) == i), 2);
     Num_tot(i) = size(z, 1);
     Num_obs(i) = floor(rand() * Num_tot(i) * sampling_rate);
